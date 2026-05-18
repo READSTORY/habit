@@ -333,25 +333,65 @@ function buy(player, cost, name) {
   }
 }
 
-// 提交任務結算
+// 提交任務結算 (包含傳送至 Google Apps Script)
 function submitDay() {
   if(p1TodayGems === 0 && p2TodayGems === 0) {
     alert("請先完成任務再結算喔！");
     return;
   }
   
-  bank.p1 += p1TodayGems;
-  bank.p2 += p2TodayGems;
-  bank.streak += 1;
-  
-  localStorage.setItem('b_p1Bank', bank.p1);
-  localStorage.setItem('b_p2Bank', bank.p2);
-  localStorage.setItem('b_streak', bank.streak);
-  
-  alert(`🚀 結算成功！\n哥哥存入 ${p1TodayGems} 💎\n弟弟存入 ${p2TodayGems} 💎`);
-  
-  // 重置頁面準備迎接明天
-  location.reload();
+  // 建立要傳送給 Google 的資料
+  const payload = {
+    date: document.getElementById('sysDate').innerText,
+    teamStreak: bank.streak + 1,
+    p1: {
+      book: $('p1_book').value, mins: $('p1_mins').value,
+      sport: $('p1_sport').value, steps: $('p1_steps').value,
+      gratitude: $('p1_gratitude').value, challenge: $('p1_challenge').value,
+      gems: p1TodayGems, tasksDone: checkTasks('p1')
+    },
+    p2: {
+      book: $('p2_book').value, mins: $('p2_mins').value,
+      sport: $('p2_sport').value, steps: $('p2_steps').value,
+      gratitude: $('p2_gratitude').value, challenge: $('p2_challenge').value,
+      gems: p2TodayGems, tasksDone: checkTasks('p2')
+    },
+    allianceBonus: (checkTasks('p1') >= 3 && checkTasks('p2') >= 3),
+    totalGems: p1TodayGems + p2TodayGems,
+    fatherEmail: 'aimreading@gmail.com' // 爸爸的信箱
+  };
+
+  const btn = document.querySelector('.btn-submit');
+  btn.innerText = "🚀 正在傳送至台灣伺服器...";
+  btn.disabled = true;
+
+  // 最新部署的 Web App 連結
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbz38_bOqeJcZte_sx9rIoXN5UZhbqfka6cdpLjjKJTL2Y7-dCaZfWlLFUw6l5ply4f_sw/exec';
+
+  // 傳送資料到雲端
+  fetch(scriptURL, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: JSON.stringify(payload)
+  }).then(() => {
+    // 傳送成功後，將寶石存入本地銀行
+    bank.p1 += p1TodayGems;
+    bank.p2 += p2TodayGems;
+    bank.streak += 1;
+    
+    localStorage.setItem('b_p1Bank', bank.p1);
+    localStorage.setItem('b_p2Bank', bank.p2);
+    localStorage.setItem('b_streak', bank.streak);
+    
+    alert(`🚀 結算並同步成功！\n哥哥存入 ${p1TodayGems} 💎\n弟弟存入 ${p2TodayGems} 💎\n爸爸已收到戰報！`);
+    
+    // 重置頁面準備迎接明天
+    location.reload();
+  }).catch(e => {
+    alert("連線失敗，請檢查網路！");
+    btn.innerText = "🚀 提交今日任務，結算能量寶石";
+    btn.disabled = false;
+  });
 }
 
 // 初始檢查
