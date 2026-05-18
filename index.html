@@ -52,7 +52,7 @@ input[type="text"], input[type="number"] { flex: 1; padding: 8px; border: 1px so
 .shop-section { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
 .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
 .shop-item { border: 2px dashed var(--border); border-radius: 15px; padding: 15px; text-align: center; }
-.shop-item.can-buy { border-color: var(--gold); background: #fffbeb; }
+.shop-item.can-buy { border-color: #f59e0b; background: #fffbeb; }
 .s-name { font-weight: bold; margin-bottom: 5px; }
 .s-cost { color: var(--gem); font-weight: bold; font-size: 1.1em; margin-bottom: 10px; }
 .btn-buy { padding: 6px 12px; border: none; border-radius: 8px; color: white; cursor: pointer; display: none; margin: 3px 2px; }
@@ -180,7 +180,7 @@ input[type="text"], input[type="number"] { flex: 1; padding: 8px; border: 1px so
 
       <div class="task-card" id="p2_t5">
         <div class="t-header"><span>5. ⚔️ 特定才能訓練</span><span class="xp-tag">+5 💎</span></div>
-        <label class="check-item"><input type="checkbox" id="p2_5_1" onchange="val()"> 啟動番茄鐘，克服困難挑戰</label>
+        <label class="check-item"><input type="checkbox" id="p2_5_1" onchange="val()"> 啟 ক্যামের番茄鐘，克服困難挑戰</label>
         <input type="text" id="p2_challenge" placeholder="今日重點修煉" style="width:100%" oninput="val()">
       </div>
 
@@ -229,13 +229,13 @@ input[type="text"], input[type="number"] { flex: 1; padding: 8px; border: 1px so
       </div>
       <div class="shop-item" id="r_400">
         <div class="s-name">單日出遊地點權</div><div class="s-cost">400 💎</div>
-        <button class="btn-buy btn-p1" id="b1_400" onclick="buy('p1', 400, '單日出遊')">弓箭手兌換</button>
-        <button class="btn-buy btn-p2" id="b2_400" onclick="buy('p2', 400, '單日出遊')">劍客兌換</button>
+        <button class="btn-buy btn-p1" id="b1_400" onclick="buy('p1', 400, '單日出遊地點權')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_400" onclick="buy('p2', 400, '單日出遊地點權')">劍客兌換</button>
       </div>
       <div class="shop-item" id="r_500">
         <div class="s-name">兩日出遊地點權</div><div class="s-cost">500 💎</div>
-        <button class="btn-buy btn-p1" id="b1_500" onclick="buy('p1', 500, '兩日出遊')">弓箭手兌換</button>
-        <button class="btn-buy btn-p2" id="b2_500" onclick="buy('p2', 500, '兩日出遊')">劍客兌換</button>
+        <button class="btn-buy btn-p1" id="b1_500" onclick="buy('p1', 500, '兩日出遊地點權')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_500" onclick="buy('p2', 500, '兩日出遊地點權')">劍客兌換</button>
       </div>
     </div>
   </div>
@@ -247,10 +247,11 @@ input[type="text"], input[type="number"] { flex: 1; padding: 8px; border: 1px so
 </div>
 
 <script>
-// 設定當前日期
+// ⚠️ 這裡請換成你剛才點擊「新增部署作業」後取得的全新網址！
+const SCRIPT_URL = 'YOUR_NEW_GAS_URL_HERE';
+
 document.getElementById('sysDate').innerText = new Date().toLocaleDateString();
 
-// 讀取銀行存款 (localStorage)
 let bank = {
   p1: parseInt(localStorage.getItem('b_p1Bank')) || 0,
   p2: parseInt(localStorage.getItem('b_p2Bank')) || 0,
@@ -260,12 +261,10 @@ document.getElementById('teamStreak').innerText = bank.streak;
 document.getElementById('p1Bank').innerText = bank.p1;
 document.getElementById('p2Bank').innerText = bank.p2;
 
-// 取得元素的輔助函數
 const $ = id => document.getElementById(id);
 const isChecked = id => $(id).checked;
 const hasValue = id => $(id).value.trim().length > 0;
 
-// 驗證 7 項任務
 function checkTasks(p) {
   let doneCount = 0;
   const t1 = isChecked(`${p}_1_1`) && isChecked(`${p}_1_2`);
@@ -284,17 +283,14 @@ function checkTasks(p) {
   return doneCount;
 }
 
-// 動態更新寶石與 UI
 let p1TodayGems = 0, p2TodayGems = 0;
 function val() {
   const p1Done = checkTasks('p1');
   const p2Done = checkTasks('p2');
 
-  // 計算今日獲得寶石
   p1TodayGems = p1Done * 5;
   p2TodayGems = p2Done * 5;
 
-  // 判定連攜大絕
   if (p1Done >= 3 && p2Done >= 3) {
     p1TodayGems += 20;
     p2TodayGems += 20;
@@ -306,7 +302,6 @@ function val() {
   $('p1Today').innerText = p1TodayGems;
   $('p2Today').innerText = p2TodayGems;
 
-  // 更新商城按鈕 (以現有銀行餘額為準)
   const items = [
     {id: '100', cost: 100}, {id: '200a', cost: 200}, {id: '200b', cost: 200}, 
     {id: '300a', cost: 300}, {id: '300b', cost: 300}, {id: '400', cost: 400}, {id: '500', cost: 500}
@@ -320,72 +315,83 @@ function val() {
   });
 }
 
-// 兌換機制 (即時扣款)
+// 銀行提領兌換功能 (會即時通知雲端大腦)
 function buy(player, cost, name) {
   if (bank[player] >= cost) {
-    if (confirm(`確定消耗 ${cost} 寶石兌換「${name}」？`)) {
+    if (confirm(`確定要消耗 ${cost} 💎 提領「${name}」嗎？\n按下確定後，爸爸立刻會收到通知喔！`)) {
+      
+      // 先扣除本地寶石
       bank[player] -= cost;
       localStorage.setItem(`b_${player}Bank`, bank[player]);
       $(`${player}Bank`).innerText = bank[player];
-      alert(`🎉 兌換成功！請找爸爸核銷。目前餘額：${bank[player]} 💎`);
-      val(); // 重新整理按鈕狀態
+      val(); 
+
+      // 傳送提領紀錄到雲端
+      const payload = {
+        action: 'redeem',
+        playerStr: player === 'p1' ? '哥哥 (策略弓箭手)' : '弟弟 (閃電劍客)',
+        itemName: name,
+        cost: cost,
+        remainingGems: bank[player],
+        fatherEmail: 'aimreading@gmail.com'
+      };
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(payload)
+      }).then(() => {
+        alert(`🎉 提領申請已送出！\n已扣除 ${cost} 💎，餘額：${bank[player]} 💎\n爸爸已經收到你的兌換通知囉！`);
+      }).catch(e => {
+        alert(`🎉 提領成功！\n已扣除 ${cost} 💎，餘額：${bank[player]} 💎`);
+      });
     }
   }
 }
 
-// 提交任務結算 (包含傳送至 Google Apps Script)
+// 每日任務提交功能
 function submitDay() {
   if(p1TodayGems === 0 && p2TodayGems === 0) {
     alert("請先完成任務再結算喔！");
     return;
   }
   
-  // 建立要傳送給 Google 的資料
   const payload = {
+    action: 'submit',
     date: document.getElementById('sysDate').innerText,
     teamStreak: bank.streak + 1,
     p1: {
-      book: $('p1_book').value, mins: $('p1_mins').value,
-      sport: $('p1_sport').value, steps: $('p1_steps').value,
+      book: $('p1_book').value, mins: $('p1_mins').value, sport: $('p1_sport').value, steps: $('p1_steps').value,
       gratitude: $('p1_gratitude').value, challenge: $('p1_challenge').value,
       gems: p1TodayGems, tasksDone: checkTasks('p1')
     },
     p2: {
-      book: $('p2_book').value, mins: $('p2_mins').value,
-      sport: $('p2_sport').value, steps: $('p2_steps').value,
+      book: $('p2_book').value, mins: $('p2_mins').value, sport: $('p2_sport').value, steps: $('p2_steps').value,
       gratitude: $('p2_gratitude').value, challenge: $('p2_challenge').value,
       gems: p2TodayGems, tasksDone: checkTasks('p2')
     },
     allianceBonus: (checkTasks('p1') >= 3 && checkTasks('p2') >= 3),
     totalGems: p1TodayGems + p2TodayGems,
-    fatherEmail: 'aimreading@gmail.com' // 爸爸的信箱
+    fatherEmail: 'aimreading@gmail.com'
   };
 
   const btn = document.querySelector('.btn-submit');
   btn.innerText = "🚀 正在傳送至台灣伺服器...";
   btn.disabled = true;
 
-  // 最新部署的 Web App 連結
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbzDT9X6ghG12y1U8nWgxevInJF2m9NqJhUDuW4LT6ve1finKA2f2shGiRtrMZUVV3uGvQ/exec';
-
-  // 傳送資料到雲端
-  fetch(scriptURL, {
+  fetch(SCRIPT_URL, {
     method: 'POST',
     mode: 'no-cors',
     body: JSON.stringify(payload)
   }).then(() => {
-    // 傳送成功後，將寶石存入本地銀行
     bank.p1 += p1TodayGems;
     bank.p2 += p2TodayGems;
     bank.streak += 1;
-    
     localStorage.setItem('b_p1Bank', bank.p1);
     localStorage.setItem('b_p2Bank', bank.p2);
     localStorage.setItem('b_streak', bank.streak);
     
     alert(`🚀 結算並同步成功！\n哥哥存入 ${p1TodayGems} 💎\n弟弟存入 ${p2TodayGems} 💎\n爸爸已收到戰報！`);
-    
-    // 重置頁面準備迎接明天
     location.reload();
   }).catch(e => {
     alert("連線失敗，請檢查網路！");
@@ -394,7 +400,6 @@ function submitDay() {
   });
 }
 
-// 初始檢查
 val();
 </script>
 </body>
