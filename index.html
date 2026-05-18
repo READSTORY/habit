@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛡️ 兄弟聯盟：能量傳送門</title>
+<style>
+:root {
+  --p1: #3b82f6;      /* 策略弓箭手 - 藍 */
+  --p2: #f97316;      /* 閃電劍客 - 橘 */
+  --gem: #10b981;     /* 寶石綠 */
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --success: #22c55e;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); color: var(--text); padding: 15px; }
+.container { max-width: 1200px; margin: auto; }
+
+/* Header & 日期 */
+header { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid var(--border); margin-bottom: 20px; }
+header h1 { color: var(--p1); font-size: 2em; margin-bottom: 10px; }
+.top-info { display: inline-flex; gap: 20px; background: #f1f5f9; padding: 10px 25px; border-radius: 30px; font-weight: bold; color: var(--text); }
+.hl { color: var(--p1); font-size: 1.2em; }
+
+/* 能量銀行 */
+.bank-section { display: flex; gap: 20px; margin-bottom: 20px; }
+.bank-card { flex: 1; background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); text-align: center; }
+.p1-bank { border-top: 6px solid var(--p1); }
+.p2-bank { border-top: 6px solid var(--p2); }
+.bank-hd { font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
+.gem-balance { font-size: 2.5em; font-weight: 800; color: var(--gem); }
+.gem-label { font-size: 0.9em; color: var(--muted); }
+
+/* 任務區 */
+.mission-wrap { display: flex; gap: 20px; margin-bottom: 20px; }
+.mission-col { flex: 1; min-width: 300px; }
+.col-hd { font-weight: bold; margin-bottom: 15px; color: var(--muted); padding-bottom: 5px; border-bottom: 2px solid var(--border); }
+.task-card { background: var(--card); border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border); transition: 0.3s; }
+.task-card.done { border-color: var(--success); background: #f0fdf4; }
+.t-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 10px; color: #334155; }
+.xp-tag { background: #ecfdf5; color: var(--gem); padding: 2px 8px; border-radius: 12px; font-size: 0.85em; }
+.check-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 0.95em; color: #475569; }
+.check-item input[type="checkbox"] { margin-top: 4px; transform: scale(1.2); accent-color: var(--success); }
+.input-row { display: flex; gap: 8px; margin: 10px 0; }
+input[type="text"], input[type="number"] { flex: 1; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9em; }
+
+/* 兌換所 */
+.shop-section { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+.shop-item { border: 2px dashed var(--border); border-radius: 15px; padding: 15px; text-align: center; }
+.shop-item.can-buy { border-color: var(--gold); background: #fffbeb; }
+.s-name { font-weight: bold; margin-bottom: 5px; }
+.s-cost { color: var(--gem); font-weight: bold; font-size: 1.1em; margin-bottom: 10px; }
+.btn-buy { padding: 6px 12px; border: none; border-radius: 8px; color: white; cursor: pointer; display: none; margin: 3px 2px; }
+.btn-p1 { background: var(--p1); }
+.btn-p2 { background: var(--p2); }
+
+/* 提交區 */
+.footer-area { background: white; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid var(--border); }
+.alliance-msg { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; color: var(--muted); }
+.btn-submit { background: linear-gradient(135deg, var(--p1), #8b5cf6); color: white; padding: 15px 40px; font-size: 1.2em; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; }
+
+@media(max-width: 768px) { .bank-section, .mission-wrap { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🛡️ 兄弟聯盟 ONLINE</h1>
+    <div class="top-info">
+      <span>📅 登入系統：<span id="sysDate"></span></span>
+      <span>🔥 團隊連續登入：第 <span class="hl" id="teamStreak">1</span> 天</span>
+    </div>
+  </header>
+
+  <div class="bank-section">
+    <div class="bank-card p1-bank">
+      <div class="bank-hd">🧙‍♂️ 哥哥 (策略弓箭手)</div>
+      <div class="gem-balance" id="p1Bank">0</div>
+      <div class="gem-label">累積可用能量寶石 💎</div>
+      <div style="margin-top:10px; font-size:0.9em; color:var(--p1)">今日預計獲得：+<span id="p1Today">0</span> 💎</div>
+    </div>
+    <div class="bank-card p2-bank">
+      <div class="bank-hd">⚡ 弟弟 (閃電劍客)</div>
+      <div class="gem-balance" id="p2Bank">0</div>
+      <div class="gem-label">累積可用能量寶石 💎</div>
+      <div style="margin-top:10px; font-size:0.9em; color:var(--p2)">今日預計獲得：+<span id="p2Today">0</span> 💎</div>
+    </div>
+  </div>
+
+  <div class="mission-wrap">
+    <div class="mission-col">
+      <div class="col-hd">🧙‍♂️ 哥哥任務區：釋放無限探索力！</div>
+      
+      <div class="task-card" id="p1_t1">
+        <div class="t-header"><span>1. 🧠 晨間基礎裝備確認</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p1_1_1" onchange="val()"> 6:50前起床，自己吃早餐、換好衣服</label>
+        <label class="check-item"><input type="checkbox" id="p1_1_2" onchange="val()"> 確認今天要帶的東西與工作</label>
+      </div>
+
+      <div class="task-card" id="p1_t2">
+        <div class="t-header"><span>2. 📖 學習：主動與共讀</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p1_2_1" onchange="val()"> 獨立完成作業，並自主閱讀/共讀</label>
+        <div class="input-row">
+          <input type="text" id="p1_book" placeholder="書名" oninput="val()">
+          <input type="number" id="p1_mins" placeholder="分鐘" style="max-width:80px;" oninput="val()">
+        </div>
+        <label class="check-item"><input type="checkbox" id="p1_2_2" onchange="val()"> 準備明日物品 (爸媽簽聯絡簿核對)</label>
+      </div>
+
+      <div class="task-card" id="p1_t3">
+        <div class="t-header"><span>3. 🏃 運動：活力放電</span><span class="xp-tag">+5 💎</span></div>
+        <div class="input-row">
+          <input type="text" id="p1_sport" placeholder="運動項目" oninput="val()">
+          <input type="number" id="p1_steps" placeholder="累積步數" style="max-width:100px;" oninput="val()">
+        </div>
+      </div>
+
+      <div class="task-card" id="p1_t4">
+        <div class="t-header"><span>4. ✏️ 品格：感恩與突破</span><span class="xp-tag">+5 💎</span></div>
+        <input type="text" id="p1_gratitude" placeholder="例如：謝謝同學借我橡皮擦..." style="width:100%" oninput="val()">
+      </div>
+
+      <div class="task-card" id="p1_t5">
+        <div class="t-header"><span>5. ⚔️ 特定才能訓練</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p1_5_1" onchange="val()"> 啟動番茄鐘，克服困難挑戰</label>
+        <input type="text" id="p1_challenge" placeholder="今日重點修煉" style="width:100%" oninput="val()">
+      </div>
+
+      <div class="task-card" id="p1_t6">
+        <div class="t-header"><span>6. 🏠 家事與作息：自我管理</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p1_6_1" onchange="val()"> 放學重置：歸位 ➔ 洗手 ➔ 整理書桌</label>
+        <label class="check-item"><input type="checkbox" id="p1_6_2" onchange="val()"> 協助晚餐預備與飯後收拾</label>
+        <label class="check-item"><input type="checkbox" id="p1_6_3" onchange="val()"> 參與 15 分鐘全家動態掃除</label>
+      </div>
+
+      <div class="task-card" id="p1_t7">
+        <div class="t-header"><span>7. 💾 Save Point (大腦存檔區)</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p1_7_1" onchange="val()"> 21:00 前完成洗澡、刷牙</label>
+        <label class="check-item"><input type="checkbox" id="p1_7_2" onchange="val()"> 21:30 前上床設鬧鐘，爸爸祝福禱告</label>
+      </div>
+    </div>
+
+    <div class="mission-col">
+      <div class="col-hd">⚡ 弟弟任務區：釋放無限探索力！</div>
+      
+      <div class="task-card" id="p2_t1">
+        <div class="t-header"><span>1. 🧠 晨間基礎裝備確認</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p2_1_1" onchange="val()"> 6:50前起床，自己吃早餐、換好衣服</label>
+        <label class="check-item"><input type="checkbox" id="p2_1_2" onchange="val()"> 確認今天要帶的東西與工作</label>
+      </div>
+
+      <div class="task-card" id="p2_t2">
+        <div class="t-header"><span>2. 📖 學習：主動與共讀</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p2_2_1" onchange="val()"> 獨立完成作業，並自主閱讀/共讀</label>
+        <div class="input-row">
+          <input type="text" id="p2_book" placeholder="書名" oninput="val()">
+          <input type="number" id="p2_mins" placeholder="分鐘" style="max-width:80px;" oninput="val()">
+        </div>
+        <label class="check-item"><input type="checkbox" id="p2_2_2" onchange="val()"> 準備明日物品 (爸媽簽聯絡簿核對)</label>
+      </div>
+
+      <div class="task-card" id="p2_t3">
+        <div class="t-header"><span>3. 🏃 運動：活力放電</span><span class="xp-tag">+5 💎</span></div>
+        <div class="input-row">
+          <input type="text" id="p2_sport" placeholder="運動項目" oninput="val()">
+          <input type="number" id="p2_steps" placeholder="累積步數" style="max-width:100px;" oninput="val()">
+        </div>
+      </div>
+
+      <div class="task-card" id="p2_t4">
+        <div class="t-header"><span>4. ✏️ 品格：感恩與突破</span><span class="xp-tag">+5 💎</span></div>
+        <input type="text" id="p2_gratitude" placeholder="例如：謝謝同學借我橡皮擦..." style="width:100%" oninput="val()">
+      </div>
+
+      <div class="task-card" id="p2_t5">
+        <div class="t-header"><span>5. ⚔️ 特定才能訓練</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p2_5_1" onchange="val()"> 啟動番茄鐘，克服困難挑戰</label>
+        <input type="text" id="p2_challenge" placeholder="今日重點修煉" style="width:100%" oninput="val()">
+      </div>
+
+      <div class="task-card" id="p2_t6">
+        <div class="t-header"><span>6. 🏠 家事與作息：自我管理</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p2_6_1" onchange="val()"> 放學重置：歸位 ➔ 洗手 ➔ 整理書桌</label>
+        <label class="check-item"><input type="checkbox" id="p2_6_2" onchange="val()"> 協助晚餐預備與飯後收拾</label>
+        <label class="check-item"><input type="checkbox" id="p2_6_3" onchange="val()"> 參與 15 分鐘全家動態掃除</label>
+      </div>
+
+      <div class="task-card" id="p2_t7">
+        <div class="t-header"><span>7. 💾 Save Point (大腦存檔區)</span><span class="xp-tag">+5 💎</span></div>
+        <label class="check-item"><input type="checkbox" id="p2_7_1" onchange="val()"> 21:00 前完成洗澡、刷牙</label>
+        <label class="check-item"><input type="checkbox" id="p2_7_2" onchange="val()"> 21:30 前上床設鬧鐘，爸爸祝福禱告</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="shop-section">
+    <div class="col-hd">🛍️ 習慣積分銀行 (兌換特權)</div>
+    <div class="shop-grid">
+      <div class="shop-item" id="r_100">
+        <div class="s-name">單項家事豁免令</div><div class="s-cost">100 💎</div>
+        <button class="btn-buy btn-p1" id="b1_100" onclick="buy('p1', 100, '家事豁免令')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_100" onclick="buy('p2', 100, '家事豁免令')">劍客兌換</button>
+      </div>
+      <div class="shop-item" id="r_200a">
+        <div class="s-name">兄弟決定優先權</div><div class="s-cost">200 💎</div>
+        <button class="btn-buy btn-p1" id="b1_200a" onclick="buy('p1', 200, '兄弟決定優先權')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_200a" onclick="buy('p2', 200, '兄弟決定優先權')">劍客兌換</button>
+      </div>
+      <div class="shop-item" id="r_200b">
+        <div class="s-name">影片選擇權(30分)</div><div class="s-cost">200 💎</div>
+        <button class="btn-buy btn-p1" id="b1_200b" onclick="buy('p1', 200, '影片選擇權')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_200b" onclick="buy('p2', 200, '影片選擇權')">劍客兌換</button>
+      </div>
+      <div class="shop-item" id="r_300a">
+        <div class="s-name">3C螢幕探索權</div><div class="s-cost">300 💎</div>
+        <button class="btn-buy btn-p1" id="b1_300a" onclick="buy('p1', 300, '3C探索權')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_300a" onclick="buy('p2', 300, '3C探索權')">劍客兌換</button>
+      </div>
+      <div class="shop-item" id="r_300b">
+        <div class="s-name">美食許願券(百元)</div><div class="s-cost">300 💎</div>
+        <button class="btn-buy btn-p1" id="b1_300b" onclick="buy('p1', 300, '美食許願券')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_300b" onclick="buy('p2', 300, '美食許願券')">劍客兌換</button>
+      </div>
+      <div class="shop-item" id="r_400">
+        <div class="s-name">單日出遊地點權</div><div class="s-cost">400 💎</div>
+        <button class="btn-buy btn-p1" id="b1_400" onclick="buy('p1', 400, '單日出遊')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_400" onclick="buy('p2', 400, '單日出遊')">劍客兌換</button>
+      </div>
+      <div class="shop-item" id="r_500">
+        <div class="s-name">兩日出遊地點權</div><div class="s-cost">500 💎</div>
+        <button class="btn-buy btn-p1" id="b1_500" onclick="buy('p1', 500, '兩日出遊')">弓箭手兌換</button>
+        <button class="btn-buy btn-p2" id="b2_500" onclick="buy('p2', 500, '兩日出遊')">劍客兌換</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-area">
+    <div class="alliance-msg" id="allianceMsg">🤝 兄弟連攜：雙方通關至少 3 項任務，觸發連攜大絕招！</div>
+    <button class="btn-submit" onclick="submitDay()">🚀 提交今日任務，結算能量寶石</button>
+  </div>
+</div>
+
+<script>
+// 設定當前日期
+document.getElementById('sysDate').innerText = new Date().toLocaleDateString();
+
+// 讀取銀行存款 (localStorage)
+let bank = {
+  p1: parseInt(localStorage.getItem('b_p1Bank')) || 0,
+  p2: parseInt(localStorage.getItem('b_p2Bank')) || 0,
+  streak: parseInt(localStorage.getItem('b_streak')) || 1
+};
+document.getElementById('teamStreak').innerText = bank.streak;
+document.getElementById('p1Bank').innerText = bank.p1;
+document.getElementById('p2Bank').innerText = bank.p2;
+
+// 取得元素的輔助函數
+const $ = id => document.getElementById(id);
+const isChecked = id => $(id).checked;
+const hasValue = id => $(id).value.trim().length > 0;
+
+// 驗證 7 項任務
+function checkTasks(p) {
+  let doneCount = 0;
+  const t1 = isChecked(`${p}_1_1`) && isChecked(`${p}_1_2`);
+  const t2 = isChecked(`${p}_2_1`) && hasValue(`${p}_book`) && hasValue(`${p}_mins`) && isChecked(`${p}_2_2`);
+  const t3 = hasValue(`${p}_sport`) && hasValue(`${p}_steps`);
+  const t4 = hasValue(`${p}_gratitude`);
+  const t5 = isChecked(`${p}_5_1`) && hasValue(`${p}_challenge`);
+  const t6 = isChecked(`${p}_6_1`) && isChecked(`${p}_6_2`) && isChecked(`${p}_6_3`);
+  const t7 = isChecked(`${p}_7_1`) && isChecked(`${p}_7_2`);
+
+  const tasks = [t1, t2, t3, t4, t5, t6, t7];
+  tasks.forEach((done, index) => {
+    $(`${p}_t${index+1}`).classList.toggle('done', done);
+    if(done) doneCount++;
+  });
+  return doneCount;
+}
+
+// 動態更新寶石與 UI
+let p1TodayGems = 0, p2TodayGems = 0;
+function val() {
+  const p1Done = checkTasks('p1');
+  const p2Done = checkTasks('p2');
+
+  // 計算今日獲得寶石
+  p1TodayGems = p1Done * 5;
+  p2TodayGems = p2Done * 5;
+
+  // 判定連攜大絕
+  if (p1Done >= 3 && p2Done >= 3) {
+    p1TodayGems += 20;
+    p2TodayGems += 20;
+    $('allianceMsg').innerHTML = '👑 【NPC 結算區】 連攜成功！雙方各額外獲得鉅額 <span style="color:var(--p2)">+20 XP</span> 加成！';
+  } else {
+    $('allianceMsg').innerHTML = `🤝 兄弟連攜判定中... (哥哥 ${p1Done}/3, 弟弟 ${p2Done}/3)`;
+  }
+
+  $('p1Today').innerText = p1TodayGems;
+  $('p2Today').innerText = p2TodayGems;
+
+  // 更新商城按鈕 (以現有銀行餘額為準)
+  const items = [
+    {id: '100', cost: 100}, {id: '200a', cost: 200}, {id: '200b', cost: 200}, 
+    {id: '300a', cost: 300}, {id: '300b', cost: 300}, {id: '400', cost: 400}, {id: '500', cost: 500}
+  ];
+  
+  items.forEach(item => {
+    $(`b1_${item.id}`).style.display = bank.p1 >= item.cost ? 'inline-block' : 'none';
+    $(`b2_${item.id}`).style.display = bank.p2 >= item.cost ? 'inline-block' : 'none';
+    const canBuy = bank.p1 >= item.cost || bank.p2 >= item.cost;
+    $(`r_${item.id}`).classList.toggle('can-buy', canBuy);
+  });
+}
+
+// 兌換機制 (即時扣款)
+function buy(player, cost, name) {
+  if (bank[player] >= cost) {
+    if (confirm(`確定消耗 ${cost} 寶石兌換「${name}」？`)) {
+      bank[player] -= cost;
+      localStorage.setItem(`b_${player}Bank`, bank[player]);
+      $(`${player}Bank`).innerText = bank[player];
+      alert(`🎉 兌換成功！請找爸爸核銷。目前餘額：${bank[player]} 💎`);
+      val(); // 重新整理按鈕狀態
+    }
+  }
+}
+
+// 提交任務結算
+function submitDay() {
+  if(p1TodayGems === 0 && p2TodayGems === 0) {
+    alert("請先完成任務再結算喔！");
+    return;
+  }
+  
+  bank.p1 += p1TodayGems;
+  bank.p2 += p2TodayGems;
+  bank.streak += 1;
+  
+  localStorage.setItem('b_p1Bank', bank.p1);
+  localStorage.setItem('b_p2Bank', bank.p2);
+  localStorage.setItem('b_streak', bank.streak);
+  
+  alert(`🚀 結算成功！\n哥哥存入 ${p1TodayGems} 💎\n弟弟存入 ${p2TodayGems} 💎`);
+  
+  // 重置頁面準備迎接明天
+  location.reload();
+}
+
+// 初始檢查
+val();
+</script>
+</body>
+</html>
